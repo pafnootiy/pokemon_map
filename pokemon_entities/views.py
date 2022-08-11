@@ -58,26 +58,55 @@ def show_all_pokemons(request):
 
 def show_pokemon(request, pokemon_id):
     pokemons = Pokemon.objects.all()
-
     for pokemon in pokemons:
+
+        print(pokemon.evolution)
+        print(type(pokemon.evolution))
+
         if pokemon.id == int(pokemon_id):
             requested_pokemon = pokemon
             break
+
     else:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
-    pokemon = {
+    if pokemon.evolution:
+        evolution_pokemon = {
+            'pokemon_id': pokemon.evolution.id,
+            'img_url': pokemon.evolution.picture.url,
+            'title_ru': pokemon.evolution.title,
+        }
+
+        pokemon = {
             'pokemon_id': pokemon.id,
             'img_url': pokemon.picture.url,
             'title_ru': pokemon.title,
-            'description':pokemon.description,
-            'title_en':pokemon.title_en,
-            'title_jp':pokemon.title_jp
-        
+            'description': pokemon.description,
+            'title_en': pokemon.title_en,
+            'title_jp': pokemon.title_jp,
+            'previous_evolution': {
+                         'pokemon_id': evolution_pokemon['pokemon_id'],
+                         'img_url': evolution_pokemon['img_url'],
+                         'title_ru': evolution_pokemon['title_ru']
+
+            },
         }
 
-    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    else:
+        pokemon = {
+            'pokemon_id': pokemon.id,
+            'img_url': pokemon.picture.url,
+            'title_ru': pokemon.title,
+            'description': pokemon.description,
+            'title_en': pokemon.title_en,
+            'title_jp': pokemon.title_jp,
+        }
 
+
+
+
+
+    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     pokemon_entities = PokemonEntity.objects.filter(pokemon_id=requested_pokemon.id)
 
     for pokemon_entity in pokemon_entities:
