@@ -59,9 +59,8 @@ def show_all_pokemons(request):
 def show_pokemon(request, pokemon_id):
     pokemons = Pokemon.objects.all()
     for pokemon in pokemons:
-
-        print(pokemon.evolution)
-        print(type(pokemon.evolution))
+        for next_evolution in pokemon.next_evolutions.all():
+            continue
 
         if pokemon.id == int(pokemon_id):
             requested_pokemon = pokemon
@@ -70,11 +69,18 @@ def show_pokemon(request, pokemon_id):
     else:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
+
+
     if pokemon.evolution:
-        evolution_pokemon = {
+        previous_pokemon = {
             'pokemon_id': pokemon.evolution.id,
             'img_url': pokemon.evolution.picture.url,
             'title_ru': pokemon.evolution.title,
+        }
+        next_pokemon = {
+            'pokemon_id': next_evolution.id,
+            'img_url': next_evolution.picture.url,
+            'title_ru': next_evolution.title,
         }
 
         pokemon = {
@@ -85,14 +91,23 @@ def show_pokemon(request, pokemon_id):
             'title_en': pokemon.title_en,
             'title_jp': pokemon.title_jp,
             'previous_evolution': {
-                         'pokemon_id': evolution_pokemon['pokemon_id'],
-                         'img_url': evolution_pokemon['img_url'],
-                         'title_ru': evolution_pokemon['title_ru']
-
-            },
+                         'pokemon_id': previous_pokemon['pokemon_id'],
+                         'img_url': previous_pokemon['img_url'],
+                         'title_ru': previous_pokemon['title_ru']
+                        },
+            'next_evolution':{
+                         'pokemon_id': next_pokemon['pokemon_id'],
+                         'img_url': next_pokemon['img_url'],
+                         'title_ru': next_pokemon['title_ru']
+                        },
         }
 
     else:
+        next_pokemon = {
+            'pokemon_id': next_evolution.id,
+            'img_url': next_evolution.picture.url,
+            'title_ru': next_evolution.title,
+        }
         pokemon = {
             'pokemon_id': pokemon.id,
             'img_url': pokemon.picture.url,
@@ -100,10 +115,12 @@ def show_pokemon(request, pokemon_id):
             'description': pokemon.description,
             'title_en': pokemon.title_en,
             'title_jp': pokemon.title_jp,
+            'next_evolution':{
+                         'pokemon_id': next_pokemon['pokemon_id'],
+                         'img_url': next_pokemon['img_url'],
+                         'title_ru': next_pokemon['title_ru']
+                        },
         }
-
-
-
 
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
