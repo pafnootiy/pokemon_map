@@ -3,8 +3,7 @@ from django.http import HttpResponseNotFound
 from django.shortcuts import render
 from django.utils.timezone import localtime
 
-from pokemon_entities.models import Pokemon
-from pokemon_entities.models import PokemonEntity
+from pokemon_entities.models import Pokemon, PokemonEntity
 
 MOSCOW_CENTER = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
@@ -21,13 +20,10 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     )
     folium.Marker(
         [lat, lon],
-        # Warning! `tooltip` attribute is disabled intentionally
-        # to fix strange folium cyrillic encoding bug
         icon=icon,
     ).add_to(folium_map)
 
 
-# my version
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
     pokemon_entities = PokemonEntity.objects.filter(appeared_at__lte=localtime(), disappeared_at__gt=localtime())
@@ -69,20 +65,7 @@ def show_pokemon(request, pokemon_id):
     else:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
-
-
-    if pokemon.evolution:
-        previous_pokemon = {
-            'pokemon_id': pokemon.evolution.id,
-            'img_url': pokemon.evolution.picture.url,
-            'title_ru': pokemon.evolution.title,
-        }
-        next_pokemon = {
-            'pokemon_id': next_evolution.id,
-            'img_url': next_evolution.picture.url,
-            'title_ru': next_evolution.title,
-        }
-
+    if pokemon.previous_evolution:
         pokemon = {
             'pokemon_id': pokemon.id,
             'img_url': pokemon.picture.url,
@@ -91,23 +74,17 @@ def show_pokemon(request, pokemon_id):
             'title_en': pokemon.title_en,
             'title_jp': pokemon.title_jp,
             'previous_evolution': {
-                         'pokemon_id': previous_pokemon['pokemon_id'],
-                         'img_url': previous_pokemon['img_url'],
-                         'title_ru': previous_pokemon['title_ru']
-                        },
+                'pokemon_id': pokemon.previous_evolution.id,
+                'img_url': pokemon.previous_evolution.picture.url,
+                'title_ru': pokemon.previous_evolution.title
+            },
             'next_evolution':{
-                         'pokemon_id': next_pokemon['pokemon_id'],
-                         'img_url': next_pokemon['img_url'],
-                         'title_ru': next_pokemon['title_ru']
+                         'pokemon_id': next_evolution.id,
+                         'img_url': next_evolution.picture.url,
+                         'title_ru': next_evolution.title
                         },
         }
-
-    else:
-        next_pokemon = {
-            'pokemon_id': next_evolution.id,
-            'img_url': next_evolution.picture.url,
-            'title_ru': next_evolution.title,
-        }
+    elif pokemon.previous_evolution:
         pokemon = {
             'pokemon_id': pokemon.id,
             'img_url': pokemon.picture.url,
@@ -115,65 +92,31 @@ def show_pokemon(request, pokemon_id):
             'description': pokemon.description,
             'title_en': pokemon.title_en,
             'title_jp': pokemon.title_jp,
-            'next_evolution':{
-                         'pokemon_id': next_pokemon['pokemon_id'],
-                         'img_url': next_pokemon['img_url'],
-                         'title_ru': next_pokemon['title_ru']
-                        },
+            'previous_evolution': {
+                'pokemon_id': pokemon.previous_evolution.id,
+                'img_url': pokemon.previous_evolution.picture.url,
+                'title_ru': pokemon.previous_evolution.title
+            },
         }
-    print("what in ",  next_evolution)
-    #     previous_pokemon = {
-    #         'pokemon_id': pokemon.evolution.id,
-    #         'img_url': pokemon.evolution.picture.url,
-    #         'title_ru': pokemon.evolution.title,
-    #     }
-    #     next_pokemon = {
-    #         'pokemon_id': next_evolution.id,
-    #         'img_url': next_evolution.picture.url,
-    #         'title_ru': next_evolution.title,
-    #     }
-    #
-    #     pokemon = {
-    #         'pokemon_id': pokemon.id,
-    #         'img_url': pokemon.picture.url,
-    #         'title_ru': pokemon.title,
-    #         'description': pokemon.description,
-    #         'title_en': pokemon.title_en,
-    #         'title_jp': pokemon.title_jp,
-    #         'previous_evolution': {
-    #             'pokemon_id': previous_pokemon['pokemon_id'],
-    #             'img_url': previous_pokemon['img_url'],
-    #             'title_ru': previous_pokemon['title_ru']
-    #         },
-    #         'next_evolution': {
-    #             'pokemon_id': next_pokemon['pokemon_id'],
-    #             'img_url': next_pokemon['img_url'],
-    #             'title_ru': next_pokemon['title_ru']
-    #         },
-    #     }
-    #
-    # else:
-    #
-    #     pokemon = {
-    #         'pokemon_id': pokemon.id,
-    #         'img_url': pokemon.picture.url,
-    #         'title_ru': pokemon.title,
-    #         'description': pokemon.description,
-    #         'title_en': pokemon.title_en,
-    #         'title_jp': pokemon.title_jp,
-    #         'previous_evolution': {
-    #             'pokemon_id': previous_pokemon['pokemon_id'],
-    #             'img_url': previous_pokemon['img_url'],
-    #             'title_ru': previous_pokemon['title_ru']
-    #         },
-    #     }
 
-
-
-
+    else:
+        pokemon = {
+            'pokemon_id': pokemon.id,
+            'img_url': pokemon.picture.url,
+            'title_ru': pokemon.title,
+            'description': pokemon.description,
+            'title_en': pokemon.title_en,
+            'title_jp': pokemon.title_jp,
+            'next_evolution': {
+                'pokemon_id': next_evolution.id,
+                'img_url': next_evolution.picture.url,
+                'title_ru': next_evolution.title
+            },
+        }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     pokemon_entities = PokemonEntity.objects.filter(pokemon_id=requested_pokemon.id)
+    print("ЧТО В pokemon_entitiesБ", pokemon_entities)
 
     for pokemon_entity in pokemon_entities:
         add_pokemon(
