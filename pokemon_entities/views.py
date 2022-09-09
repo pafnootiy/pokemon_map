@@ -65,6 +65,8 @@ def show_pokemon(request, pokemon_id):
     else:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
+    pokemon_entities = pokemon.pokemon_entities.all()
+ 
     if pokemon.previous_evolution:
         pokemon = {
             'pokemon_id': pokemon.id,
@@ -78,11 +80,11 @@ def show_pokemon(request, pokemon_id):
                 'img_url': pokemon.previous_evolution.picture.url,
                 'title_ru': pokemon.previous_evolution.title
             },
-            'next_evolution':{
-                         'pokemon_id': next_evolution.id,
-                         'img_url': next_evolution.picture.url,
-                         'title_ru': next_evolution.title
-                        },
+            'next_evolution': {
+                'pokemon_id': next_evolution.id,
+                'img_url': next_evolution.picture.url,
+                'title_ru': next_evolution.title
+            },
         }
     elif pokemon.previous_evolution:
         pokemon = {
@@ -115,8 +117,6 @@ def show_pokemon(request, pokemon_id):
         }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    pokemon_entities = PokemonEntity.objects.filter(pokemon_id=requested_pokemon.id)
-    print("ЧТО В pokemon_entitiesБ", pokemon_entities)
 
     for pokemon_entity in pokemon_entities:
         add_pokemon(
