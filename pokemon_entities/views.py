@@ -66,7 +66,7 @@ def show_pokemon(request, pokemon_id):
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
     pokemon_entities = pokemon.pokemon_entities.all()
- 
+
     if pokemon.previous_evolution:
         pokemon = {
             'pokemon_id': pokemon.id,
@@ -84,20 +84,6 @@ def show_pokemon(request, pokemon_id):
                 'pokemon_id': next_evolution.id,
                 'img_url': next_evolution.picture.url,
                 'title_ru': next_evolution.title
-            },
-        }
-    elif pokemon.previous_evolution:
-        pokemon = {
-            'pokemon_id': pokemon.id,
-            'img_url': pokemon.picture.url,
-            'title_ru': pokemon.title,
-            'description': pokemon.description,
-            'title_en': pokemon.title_en,
-            'title_jp': pokemon.title_jp,
-            'previous_evolution': {
-                'pokemon_id': pokemon.previous_evolution.id,
-                'img_url': pokemon.previous_evolution.picture.url,
-                'title_ru': pokemon.previous_evolution.title
             },
         }
 
