@@ -1,6 +1,5 @@
 import folium
 
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseNotFound
 from django.shortcuts import get_object_or_404
@@ -59,13 +58,7 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemons = Pokemon.objects.all()
-    for pokemon in pokemons:
-        if pokemon.id == int(pokemon_id):
-            break
-    else:
-        return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
-
+    pokemon = get_object_or_404(Pokemon, id=pokemon_id)
     pokemon_entities = pokemon.entities.all()
 
     serialized_pokemon = {
@@ -91,7 +84,6 @@ def show_pokemon(request, pokemon_id):
             }
 
     except Pokemon.DoesNotExist:
-        get_object_or_404(Pokemon, id=pokemon_id)
         serialized_pokemon['previous_evolution'] = {
             'pokemon_id': pokemon.previous_evolution.id,
             'img_url': pokemon.previous_evolution.picture.url,
