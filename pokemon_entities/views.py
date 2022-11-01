@@ -84,11 +84,7 @@ def show_pokemon(request, pokemon_id):
             }
 
     except Pokemon.DoesNotExist:
-        serialized_pokemon['previous_evolution'] = {
-            'pokemon_id': pokemon.previous_evolution.id,
-            'img_url': pokemon.previous_evolution.picture.url,
-            'title_ru': pokemon.previous_evolution.title
-        }
+        pass
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in pokemon_entities:
